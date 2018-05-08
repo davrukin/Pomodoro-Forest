@@ -8,10 +8,23 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.Chronometer
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.ToggleButton
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+
+    private var chronometer: Chronometer ?= null
+    private var toggleButton: ToggleButton ?= null
+    private var textPoints: TextView ?= null
+    private var textBreakLength: TextView ?= null
+    private var progressWheel: ProgressBar ?= null
+
+    private var points: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +42,64 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         toggle.syncState()
 
         nav_view.setNavigationItemSelectedListener(this)
+
+        initializeUI()
+        setListeners()
+    }
+
+    private fun initializeUI() {
+        this.chronometer = findViewById(R.id.chronometer)
+        this.toggleButton = findViewById(R.id.chronometer_toggle)
+
+        this.textPoints = findViewById(R.id.text_points)
+        this.textPoints!!.text = points.toString()
+
+        this.textBreakLength = findViewById(R.id.text_break_length)
+        this.textBreakLength!!.visibility = View.INVISIBLE
+
+        this.progressWheel = findViewById(R.id.progress_wheel)
+        this.progressWheel!!.visibility = View.INVISIBLE
+    }
+
+    private fun setListeners() {
+        this.toggleButton!!.setOnClickListener { toggleChronometer() }
+    }
+
+    private fun toggleChronometer() {
+        if (!this.chronometer!!.isActivated) {
+            this.chronometer!!.start()
+            this.toggleButton!!.toggle()
+            checkPoints(true)
+            this.progressWheel!!.visibility = View.VISIBLE
+            this.progressWheel!!.isActivated = true
+        } else {
+            this.chronometer!!.stop()
+            this.toggleButton!!.toggle()
+            checkPoints(false)
+            this.progressWheel!!.visibility = View.INVISIBLE
+            this.progressWheel!!.isActivated = false
+        }
+    }
+
+    private fun checkPoints(enabled: Boolean) {
+        this.textBreakLength!!.visibility = View.VISIBLE
+        if (this.points < 4) {
+            this.textBreakLength!!.text = "Take a short break"
+            updatePoints()
+        } else {
+            this.textBreakLength!!.text = "Take a long break, like rn"
+            resetCount()
+        }
+    }
+
+    private fun updatePoints() {
+        this.points++
+        this.textPoints!!.text = points.toString()
+    }
+
+    private fun resetCount() {
+        this.points = 0
+        this.textPoints!!.text = points.toString()
     }
 
     override fun onBackPressed() {
@@ -40,7 +111,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // Inflate t he menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
         return true
     }
